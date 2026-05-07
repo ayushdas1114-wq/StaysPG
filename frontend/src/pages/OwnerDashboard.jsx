@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Home, MapPin, IndianRupee, Phone, CheckCircle, Upload, Image as ImageIcon, X } from 'lucide-react';
 import Footer from '../components/Footer';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'https://stayspg.onrender.com/api';
 const AMENITIES = ['WiFi', 'AC', 'Food Facility', 'Power Backup', 'RO Water', 'Parking', 'CCTV', 'Washing Machine'];
 
 const OwnerDashboard = () => {

@@ -4,7 +4,7 @@ import { Search as SearchIcon, Building2, Home as HomeIcon, UtensilsCrossed, Arr
 import ListingCard from '../components/ListingCard';
 import Footer from '../components/Footer';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'https://stayspg.onrender.com/api';
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');

@@ -4,7 +4,7 @@ import { SlidersHorizontal, Search as SearchIcon, X } from 'lucide-react';
 import ListingCard from '../components/ListingCard';
 import Footer from '../components/Footer';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'https://stayspg.onrender.com/api';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();

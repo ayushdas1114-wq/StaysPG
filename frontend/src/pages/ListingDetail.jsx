@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import Footer from '../components/Footer';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'https://stayspg.onrender.com/api';
 const badgeColor = { PG: '#E65100', Flat: '#2563eb', "Owner's House": '#d97706' };
 
 const ListingDetail = () => {
