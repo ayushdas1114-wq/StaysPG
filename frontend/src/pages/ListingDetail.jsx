@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { 
-  MapPin, ArrowLeft, Phone, User, Calendar, ShieldCheck, CheckCircle2, Info, ChevronLeft, ChevronRight, Share2 
+  MapPin, ArrowLeft, Phone, User, Calendar, ShieldCheck, CheckCircle2, Info, ChevronLeft, ChevronRight, Share2, LogIn 
 } from 'lucide-react';
 import Footer from '../components/Footer';
 
@@ -16,6 +17,7 @@ const ListingDetail = () => {
   const [copied, setCopied] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [checking, setChecking] = useState(false);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     fetch(`${API}/listings/${id}`)
@@ -24,7 +26,7 @@ const ListingDetail = () => {
         setListing(data); 
         setLoading(false);
         // Initialize map after listing data is available
-        if (data && window.L) {
+        if (data && window.L && user) {
           setTimeout(() => {
             const map = window.L.map('listing-map').setView([data.lat || 20.2961, data.lng || 85.8245], 15);
             window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -37,7 +39,7 @@ const ListingDetail = () => {
         }
       })
       .catch(() => setLoading(false));
-  }, [id]);
+  }, [id, user]);
 
   const handleCheckAvailability = () => {
     setChecking(true);
@@ -53,6 +55,40 @@ const ListingDetail = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  // If not logged in, show login prompt
+  if (!user) {
+    return (
+      <div>
+        <div className="container section" style={{ textAlign: 'center', padding: '6rem 0' }}>
+          <div style={{ 
+            maxWidth: '480px', margin: '0 auto', padding: '3rem', 
+            background: 'white', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)'
+          }}>
+            <div style={{ 
+              width: '80px', height: '80px', borderRadius: '50%', 
+              background: 'var(--primary-pale)', color: 'var(--primary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 1.5rem', fontSize: '2rem'
+            }}>
+              <LogIn size={36} />
+            </div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+              Login to View Details
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+              Sign in to see full details, location on map, and contact the owner.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <Link to="/login" className="btn btn-primary btn-lg" style={{ flex: 1 }}>Login</Link>
+              <Link to="/register" className="btn btn-outline btn-lg" style={{ flex: 1 }}>Sign Up</Link>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (loading) return <div className="container section" style={{ textAlign: 'center', padding: '6rem 0' }}>Loading details...</div>;
   if (!listing) return <div className="container section" style={{ textAlign: 'center', padding: '6rem 0' }}><h2>Stay Not Found</h2><Link to="/search" className="btn btn-primary">Browse All</Link></div>;
