@@ -1,0 +1,11 @@
+node_modules/
+.env
+.DS_Store
+dist/
+build/
+*.log
+.gemini/
+server_listings.log
+server.log
+test-db-connection.js
+cleanup-and-seed.js
