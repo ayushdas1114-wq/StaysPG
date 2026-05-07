@@ -53,7 +53,7 @@ const Home = () => {
             <p>Latest listings from verified owners in Bhubaneswar</p>
           </div>
           <div className="grid-3">
-            {listings.slice(0, 6).map(l => <ListingCard key={l.id} listing={l} />)}
+            {listings.slice(0, 6).map(l => <ListingCard key={l._id} listing={l} />)}
           </div>
           {listings.length > 6 && (
             <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>

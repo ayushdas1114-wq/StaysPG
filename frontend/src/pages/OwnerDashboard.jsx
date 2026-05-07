@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Home, MapPin, IndianRupee, Phone, CheckCircle, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Trash2, Plus, Home, MapPin, IndianRupee, Phone, CheckCircle, Upload, Image as ImageIcon, X, Pencil } from 'lucide-react';
 import Footer from '../components/Footer';
 
 const API = import.meta.env.VITE_API_URL || 'https://stayspg.onrender.com/api';
@@ -13,22 +13,14 @@ const OwnerDashboard = () => {
   const [myListings, setMyListings] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [editingId, setEditingId] = useState(null);
 
-  // Simplified Form State
-  const [formData, setFormData] = useState({
-    title: '',
-    category: 'PG',
-    suitableFor: 'Any',
-    location: '',
-    landmark: '',
-    rent: '',
-    deposit: '',
-    bhk: '',
-    contact: '',
-    isAvailable: true,
-    amenities: [],
-    images: []
-  });
+  const emptyForm = {
+    title: '', category: 'PG', suitableFor: 'Any', location: '', landmark: '',
+    rent: '', deposit: '', bhk: '', contact: '', isAvailable: true, amenities: [], images: []
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
 
   useEffect(() => {
     if (!user || !isOwner) { navigate('/login'); return; }
@@ -80,6 +72,30 @@ const OwnerDashboard = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const handleEdit = (listing) => {
+    setEditingId(listing._id);
+    setFormData({
+      title: listing.title,
+      category: listing.category,
+      suitableFor: listing.suitableFor,
+      location: listing.location,
+      landmark: listing.landmark || '',
+      rent: listing.rent,
+      deposit: listing.deposit || '',
+      bhk: listing.bhk || '',
+      contact: listing.contact || '',
+      isAvailable: listing.isAvailable !== false,
+      amenities: listing.amenities || [],
+      images: listing.images || []
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData({ ...emptyForm, contact: user.phone || '' });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(''); setError('');
@@ -91,20 +107,24 @@ const OwnerDashboard = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API}/listings`, {
-        method: 'POST',
+      const url = editingId ? `${API}/listings/${editingId}` : `${API}/listings`;
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ ...formData, images: formData.images.filter(img => img.trim()) })
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage('Listing published successfully! 🎉');
-        setMyListings(prev => [...prev, data]);
-        setFormData({
-          title: '', category: 'PG', suitableFor: 'Any', location: '', landmark: '',
-          rent: '', deposit: '', bhk: '', contact: user.phone || '',
-          amenities: [], images: []
-        });
+        setMessage(editingId ? 'Listing updated successfully! ✏️' : 'Listing published successfully! 🎉');
+        if (editingId) {
+          setMyListings(prev => prev.map(l => l._id === editingId ? data : l));
+        } else {
+          setMyListings(prev => [...prev, data]);
+        }
+        setEditingId(null);
+        setFormData({ ...emptyForm, contact: user.phone || '' });
       } else {
         setError(data.message || 'Failed to list property');
       }
@@ -116,7 +136,7 @@ const OwnerDashboard = () => {
     if (!window.confirm('Delete this listing?')) return;
     try {
       const res = await fetch(`${API}/listings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-      if (res.ok) setMyListings(prev => prev.filter(l => l.id !== id));
+      if (res.ok) setMyListings(prev => prev.filter(l => l._id !== id));
     } catch { setError('Failed to delete'); }
   };
 
@@ -134,7 +154,14 @@ const OwnerDashboard = () => {
         <div className="dashboard-layout">
           {/* Streamlined Form */}
           <div className="dashboard-form" style={{ padding: '2.5rem' }}>
-            <h2 className="form-section-title"><Plus size={22} color="var(--primary)" /> List New Property</h2>
+            <h2 className="form-section-title">
+              {editingId ? <><Pencil size={22} color="var(--accent)" /> Edit Listing</> : <><Plus size={22} color="var(--primary)" /> List New Property</>}
+            </h2>
+            {editingId && (
+              <button onClick={cancelEdit} className="btn btn-ghost btn-sm" style={{ marginBottom: '1rem', gap: '0.4rem' }}>
+                <X size={16} /> Cancel Edit
+              </button>
+            )}
             <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
               <div className="input-group">
                 <label>Property Title*</label>
@@ -195,33 +222,29 @@ const OwnerDashboard = () => {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className="form-group">
-                  <label>Contact Number (Seekers will call this)</label>
-                  <div className="input-with-icon">
-                    <Phone size={18} />
-                    <input type="text" placeholder="e.g. 9876543210" value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value})} required />
-                  </div>
+              <div className="grid-2">
+                <div className="input-group">
+                  <label>Contact Number*</label>
+                  <input type="tel" name="contact" className="input" value={formData.contact} onChange={handleInputChange} placeholder="10-digit number" maxLength={10} />
                 </div>
-
-                <div className="form-group">
+                <div className="input-group">
                   <label>Currently Available?</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-                    <button 
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+                    <button
                       type="button"
-                      onClick={() => setFormData({...formData, isAvailable: true})}
+                      onClick={() => setFormData({ ...formData, isAvailable: true })}
                       className={`btn btn-sm ${formData.isAvailable ? 'btn-primary' : 'btn-ghost'}`}
                       style={{ flex: 1, borderRadius: 'var(--radius-md)' }}
                     >
-                      Yes (Available)
+                      ✓ Available
                     </button>
-                    <button 
+                    <button
                       type="button"
-                      onClick={() => setFormData({...formData, isAvailable: false})}
+                      onClick={() => setFormData({ ...formData, isAvailable: false })}
                       className={`btn btn-sm ${!formData.isAvailable ? 'btn-danger' : 'btn-ghost'}`}
                       style={{ flex: 1, borderRadius: 'var(--radius-md)' }}
                     >
-                      No (Occupied)
+                      ✗ Occupied
                     </button>
                   </div>
                 </div>
@@ -239,21 +262,21 @@ const OwnerDashboard = () => {
               </div>
 
               <div className="input-group">
-                <label>Property Images* <span className="label-hint">(Select from your device)</span></label>
-                <div 
-                  className="upload-zone" 
+                <label>Property Images <span className="label-hint">(Select from your device)</span></label>
+                <div
+                  className="upload-zone"
                   onClick={() => document.getElementById('file-upload').click()}
                 >
                   <Upload className="upload-icon" size={32} />
                   <p className="upload-text">Click to upload photos</p>
                   <p className="upload-hint">PNG, JPG or WEBP (Max 5MB)</p>
-                  <input 
-                    id="file-upload" 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                    style={{ display: 'none' }} 
+                  <input
+                    id="file-upload"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
                   />
                 </div>
 
@@ -262,9 +285,9 @@ const OwnerDashboard = () => {
                     {formData.images.map((img, idx) => (
                       <div key={idx} className="preview-item">
                         <img src={img} alt="Preview" className="preview-img" />
-                        <button 
-                          type="button" 
-                          className="remove-btn" 
+                        <button
+                          type="button"
+                          className="remove-btn"
                           onClick={() => removeImage(idx)}
                         >
                           <X size={14} />
@@ -275,24 +298,19 @@ const OwnerDashboard = () => {
                 )}
               </div>
 
-              <div className="input-group">
-                <label>Contact Number*</label>
-                <input type="tel" name="contact" className="input" value={formData.contact} onChange={handleInputChange} placeholder="10-digit number" maxLength={10} />
-              </div>
-
-              <button 
-                type="submit" 
-                className="btn btn-primary btn-lg" 
+              <button
+                type="submit"
+                className="btn btn-primary btn-lg"
                 style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    Publishing... <div className="spinner-sm" style={{ marginLeft: '0.75rem' }}></div>
+                    {editingId ? 'Updating...' : 'Publishing...'} <div className="spinner-sm" style={{ marginLeft: '0.75rem' }}></div>
                   </>
                 ) : (
                   <>
-                    Publish Listing <CheckCircle size={18} style={{ marginLeft: '0.5rem' }} />
+                    {editingId ? 'Save Changes' : 'Publish Listing'} <CheckCircle size={18} style={{ marginLeft: '0.5rem' }} />
                   </>
                 )}
               </button>
@@ -314,16 +332,26 @@ const OwnerDashboard = () => {
                 <div key={l._id} className="my-listing-card">
                   <img src={l.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'} alt="" className="my-listing-img" />
                   <div className="my-listing-body">
-                    <span className={`card-badge ${l.category === 'PG' ? 'badge-pg' : l.category === 'Flat' ? 'badge-flat' : 'badge-owner-house'}`} style={{ position: 'static', display: 'inline-block', width: 'fit-content' }}>
-                      {l.category}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span className={`card-badge ${l.category === 'PG' ? 'badge-pg' : l.category === 'Flat' ? 'badge-flat' : 'badge-owner-house'}`} style={{ position: 'static', display: 'inline-block', width: 'fit-content' }}>
+                        {l.category}
+                      </span>
+                      {l.isAvailable === false && (
+                        <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem', borderRadius: '999px', background: '#fef2f2', color: '#dc2626', fontWeight: 700 }}>Occupied</span>
+                      )}
+                    </div>
                     <h4 style={{ margin: '0.4rem 0 0.1rem', fontSize: '0.95rem' }}>{l.title}</h4>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{l.location}</p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
                       <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.9rem' }}>₹{l.rent}/mo</span>
-                      <button onClick={() => handleDelete(l._id)} className="btn btn-danger btn-sm" style={{ padding: '0.4rem' }}>
-                        <Trash2 size={14} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button onClick={() => handleEdit(l)} className="btn btn-ghost btn-sm" style={{ padding: '0.4rem', color: 'var(--primary)' }}>
+                          <Pencil size={14} />
+                        </button>
+                        <button onClick={() => handleDelete(l._id)} className="btn btn-danger btn-sm" style={{ padding: '0.4rem' }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

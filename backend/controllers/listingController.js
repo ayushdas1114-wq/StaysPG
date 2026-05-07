@@ -73,6 +73,24 @@ const createListing = async (req, res) => {
   }
 };
 
+const updateListing = async (req, res) => {
+  try {
+    const listing = await Listing.findOneAndUpdate(
+      { _id: req.params.id, ownerId: req.user._id },
+      { $set: req.body },
+      { new: true }
+    );
+    if (listing) {
+      res.status(200).json(listing);
+    } else {
+      res.status(404).json({ message: 'Unauthorized or not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 const deleteListing = async (req, res) => {
   try {
     const listing = await Listing.findOneAndDelete({ _id: req.params.id, ownerId: req.user._id });
@@ -86,5 +104,5 @@ const deleteListing = async (req, res) => {
   }
 };
 
-module.exports = { getListings, getListingById, getMyListings, createListing, deleteListing };
+module.exports = { getListings, getListingById, getMyListings, createListing, updateListing, deleteListing };
 

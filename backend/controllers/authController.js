@@ -12,6 +12,13 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Role must be customer or owner' });
     }
 
+    // Validate real email domain
+    const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com'];
+    const emailDomain = email.split('@')[1]?.toLowerCase();
+    if (!emailDomain || !allowedDomains.includes(emailDomain)) {
+      return res.status(400).json({ message: 'Please use a real email (Gmail, Yahoo, Outlook, etc.)' });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });

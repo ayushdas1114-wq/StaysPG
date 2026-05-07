@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, Search as SearchIcon, X } from 'lucide-react';
+import { useState, useEffect, useContext } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { SlidersHorizontal, Search as SearchIcon, X, LogIn } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
 import Footer from '../components/Footer';
 
 const API = import.meta.env.VITE_API_URL || 'https://stayspg.onrender.com/api';
 
 const Search = () => {
+  const { user } = useContext(AuthContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,40 @@ const Search = () => {
     setQuery(''); setCategory(''); setGender(''); setMaxPrice(''); setSearchParams({});
     fetchListings('', '', '', '');
   };
+
+  // If not logged in, show login prompt
+  if (!user) {
+    return (
+      <div>
+        <div className="container section" style={{ textAlign: 'center', padding: '6rem 0' }}>
+          <div style={{ 
+            maxWidth: '480px', margin: '0 auto', padding: '3rem', 
+            background: 'white', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)'
+          }}>
+            <div style={{ 
+              width: '80px', height: '80px', borderRadius: '50%', 
+              background: 'var(--primary-pale)', color: 'var(--primary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 1.5rem', fontSize: '2rem'
+            }}>
+              <LogIn size={36} />
+            </div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+              Login to Explore Rooms
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+              Sign in to browse PGs, Flats & Mess listings in Bhubaneswar. It's free and takes just 10 seconds!
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <Link to="/login" className="btn btn-primary btn-lg" style={{ flex: 1 }}>Login</Link>
+              <Link to="/register" className="btn btn-outline btn-lg" style={{ flex: 1 }}>Sign Up Free</Link>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div>
