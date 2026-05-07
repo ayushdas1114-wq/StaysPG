@@ -278,7 +278,7 @@ const OwnerDashboard = () => {
               </div>
             ) : (
               myListings.map(l => (
-                <div key={l.id} className="my-listing-card">
+                <div key={l._id} className="my-listing-card">
                   <img src={l.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'} alt="" className="my-listing-img" />
                   <div className="my-listing-body">
                     <span className={`card-badge ${l.category === 'PG' ? 'badge-pg' : l.category === 'Flat' ? 'badge-flat' : 'badge-owner-house'}`} style={{ position: 'static', display: 'inline-block', width: 'fit-content' }}>
@@ -288,7 +288,7 @@ const OwnerDashboard = () => {
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{l.location}</p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
                       <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.9rem' }}>₹{l.rent}/mo</span>
-                      <button onClick={() => handleDelete(l.id)} className="btn btn-danger btn-sm" style={{ padding: '0.4rem' }}>
+                      <button onClick={() => handleDelete(l._id)} className="btn btn-danger btn-sm" style={{ padding: '0.4rem' }}>
                         <Trash2 size={14} />
                       </button>
                     </div>

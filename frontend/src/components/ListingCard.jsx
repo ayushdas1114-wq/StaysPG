@@ -12,7 +12,7 @@ const ListingCard = ({ listing }) => {
   const rent = listing.rent || 0;
 
   return (
-    <Link to={`/listing/${listing.id}`} className="card" id={`listing-card-${listing.id}`}>
+    <Link to={`/listing/${listing._id}`} className="card" id={`listing-card-${listing._id}`}>
       <div className="card-img-wrapper">
         <img
           src={mainImage}

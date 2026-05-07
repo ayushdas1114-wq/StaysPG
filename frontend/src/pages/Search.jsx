@@ -59,7 +59,7 @@ const Search = () => {
             </form>
           </aside>
           <main className="results-area">
-            {loading ? <p>Searching...</p> : listings.length > 0 ? <div className="grid-3">{listings.map(l => <ListingCard key={l.id} listing={l} />)}</div> : <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}><h3>No rooms found</h3><p>Try resetting filters or searching another area.</p></div>}
+            {loading ? <p>Searching...</p> : listings.length > 0 ? <div className="grid-3">{listings.map(l => <ListingCard key={l._id} listing={l} />)}</div> : <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}><h3>No rooms found</h3><p>Try resetting filters or searching another area.</p></div>}
           </main>
         </div>
       </div>
