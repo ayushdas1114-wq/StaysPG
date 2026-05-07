@@ -173,7 +173,7 @@ const ListingDetail = () => {
                     </div>
                   ) : (
                     <div style={{ marginBottom: '1rem', padding: '1rem', background: '#fff7ed', borderRadius: 'var(--radius-md)', color: '#9a3412', fontSize: '0.9rem', textAlign: 'center', fontWeight: 600 }}>
-                      <Info size={18} style={{ verticalAlign: '-4px', marginRight: '4px' }} /> Currently Occupied (Contact owner for next opening)
+                      <Info size={18} style={{ verticalAlign: '-4px', marginRight: '4px' }} /> Currently Occupied
                     </div>
                   )}
                   <a href={`tel:${listing.contact}`} className="btn btn-primary btn-lg" style={{ width: '100%', marginBottom: '0.75rem' }}><Phone size={18} /> Call Owner</a>
