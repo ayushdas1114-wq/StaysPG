@@ -167,9 +167,15 @@ const ListingDetail = () => {
                 </button>
               ) : (
                 <>
-                  <div style={{ marginBottom: '1rem', padding: '1rem', background: '#ecfdf5', borderRadius: 'var(--radius-md)', color: '#065f46', fontSize: '0.9rem', textAlign: 'center', fontWeight: 600 }}>
-                    <ShieldCheck size={18} style={{ verticalAlign: '-4px', marginRight: '4px' }} /> This property is currently available!
-                  </div>
+                  {listing.isAvailable !== false ? (
+                    <div style={{ marginBottom: '1rem', padding: '1rem', background: '#ecfdf5', borderRadius: 'var(--radius-md)', color: '#065f46', fontSize: '0.9rem', textAlign: 'center', fontWeight: 600 }}>
+                      <ShieldCheck size={18} style={{ verticalAlign: '-4px', marginRight: '4px' }} /> This property is currently available!
+                    </div>
+                  ) : (
+                    <div style={{ marginBottom: '1rem', padding: '1rem', background: '#fff7ed', borderRadius: 'var(--radius-md)', color: '#9a3412', fontSize: '0.9rem', textAlign: 'center', fontWeight: 600 }}>
+                      <Info size={18} style={{ verticalAlign: '-4px', marginRight: '4px' }} /> Currently Occupied (Contact owner for next opening)
+                    </div>
+                  )}
                   <a href={`tel:${listing.contact}`} className="btn btn-primary btn-lg" style={{ width: '100%', marginBottom: '0.75rem' }}><Phone size={18} /> Call Owner</a>
                   <a href={`https://wa.me/91${listing.contact}?text=Hi, I found your "${listing.title}" on BhubaneswarStay.`} target="_blank" rel="noopener" className="btn btn-accent btn-lg" style={{ width: '100%' }}>💬 WhatsApp</a>
                 </>
