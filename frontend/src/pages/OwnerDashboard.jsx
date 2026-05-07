@@ -25,6 +25,7 @@ const OwnerDashboard = () => {
     deposit: '',
     bhk: '',
     contact: '',
+    isAvailable: true,
     amenities: [],
     images: []
   });
@@ -193,6 +194,38 @@ const OwnerDashboard = () => {
                   </select>
                 </div>
               )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div className="form-group">
+                  <label>Contact Number (Seekers will call this)</label>
+                  <div className="input-with-icon">
+                    <Phone size={18} />
+                    <input type="text" placeholder="e.g. 9876543210" value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value})} required />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Currently Available?</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setFormData({...formData, isAvailable: true})}
+                      className={`btn btn-sm ${formData.isAvailable ? 'btn-primary' : 'btn-ghost'}`}
+                      style={{ flex: 1, borderRadius: 'var(--radius-md)' }}
+                    >
+                      Yes (Available)
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setFormData({...formData, isAvailable: false})}
+                      className={`btn btn-sm ${!formData.isAvailable ? 'btn-danger' : 'btn-ghost'}`}
+                      style={{ flex: 1, borderRadius: 'var(--radius-md)' }}
+                    >
+                      No (Occupied)
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               <div className="input-group">
                 <label>Key Amenities</label>
