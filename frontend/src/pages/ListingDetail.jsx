@@ -14,13 +14,39 @@ const ListingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     fetch(`${API}/listings/${id}`)
       .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-      .then(data => { setListing(data); setLoading(false); })
+      .then(data => { 
+        setListing(data); 
+        setLoading(false);
+        // Initialize map after listing data is available
+        if (data && window.L) {
+          setTimeout(() => {
+            const map = window.L.map('listing-map').setView([data.lat || 20.2961, data.lng || 85.8245], 15);
+            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '© OpenStreetMap'
+            }).addTo(map);
+            window.L.marker([data.lat || 20.2961, data.lng || 85.8245]).addTo(map)
+              .bindPopup(data.title)
+              .openPopup();
+          }, 500);
+        }
+      })
       .catch(() => setLoading(false));
   }, [id]);
+
+  const handleCheckAvailability = () => {
+    setChecking(true);
+    // Simulate checking availability
+    setTimeout(() => {
+      setChecking(false);
+      setShowContact(true);
+    }, 1500);
+  };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -58,11 +84,16 @@ const ListingDetail = () => {
               <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
                 <span style={{ padding: '0.35rem 1rem', borderRadius: 'var(--radius-full)', background: badgeColor[listing.category] || 'var(--primary)', color: 'white', fontSize: '0.8rem', fontWeight: 700 }}>{listing.category}</span>
                 <span style={{ padding: '0.35rem 1rem', borderRadius: 'var(--radius-full)', background: 'var(--primary-pale)', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 700 }}>{listing.suitableFor}</span>
-                {listing.bhk && <span className="tag" style={{ padding: '0.35rem 1rem' }}>{listing.bhk}</span>}
               </div>
               <h1 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>{listing.title}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1.5rem' }}>
                 <MapPin size={20} color="var(--primary)" /> {listing.location} {listing.landmark && <span>• Near {listing.landmark}</span>}
+              </div>
+
+              {/* Map Container */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem', fontWeight: 800 }}>Location on Map</h3>
+                <div id="listing-map" style={{ height: '300px', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid #eee' }}></div>
               </div>
 
               <div style={{ padding: '2rem', background: 'white', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-sm)', marginBottom: '2rem' }}>
@@ -89,10 +120,26 @@ const ListingDetail = () => {
                 </div>
               </div>
 
-              <a href={`tel:${listing.contact}`} className="btn btn-primary btn-lg" style={{ width: '100%', marginBottom: '0.75rem' }}><Phone size={18} /> Call Owner</a>
-              <a href={`https://wa.me/91${listing.contact}?text=Hi, I found your "${listing.title}" on BhubaneswarStay.`} target="_blank" rel="noopener" className="btn btn-accent btn-lg" style={{ width: '100%' }}>💬 WhatsApp</a>
+              {!showContact ? (
+                <button 
+                  onClick={handleCheckAvailability} 
+                  disabled={checking}
+                  className="btn btn-primary btn-lg" 
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                >
+                  {checking ? <><div className="spinner-sm"></div> Checking...</> : 'Check Availability'}
+                </button>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '1rem', padding: '1rem', background: '#ecfdf5', borderRadius: 'var(--radius-md)', color: '#065f46', fontSize: '0.9rem', textAlign: 'center', fontWeight: 600 }}>
+                    <ShieldCheck size={18} style={{ verticalAlign: '-4px', marginRight: '4px' }} /> This property is currently available!
+                  </div>
+                  <a href={`tel:${listing.contact}`} className="btn btn-primary btn-lg" style={{ width: '100%', marginBottom: '0.75rem' }}><Phone size={18} /> Call Owner</a>
+                  <a href={`https://wa.me/91${listing.contact}?text=Hi, I found your "${listing.title}" on BhubaneswarStay.`} target="_blank" rel="noopener" className="btn btn-accent btn-lg" style={{ width: '100%' }}>💬 WhatsApp</a>
+                </>
+              )}
               
-              <div style={{ marginTop: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}><Calendar size={14} style={{ verticalAlign: '-2px' }} /> Posted: {listing.createdAt}</div>
+              <div style={{ marginTop: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}><Calendar size={14} style={{ verticalAlign: '-2px' }} /> Posted: {new Date(listing.createdAt).toLocaleDateString()}</div>
             </div>
           </div>
         </div>

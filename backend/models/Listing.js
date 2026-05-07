@@ -12,6 +12,9 @@ const listingSchema = new mongoose.Schema({
   amenities: { type: [String], default: [] },
   images: { type: [String], default: [] },
   contact: { type: String, default: '' },
+  isAvailable: { type: Boolean, default: true },
+  lat: { type: Number, default: 20.2961 }, // Default Bhubaneswar Lat
+  lng: { type: Number, default: 85.8245 }, // Default Bhubaneswar Lng
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   ownerName: { type: String, default: 'Owner' },
   createdAt: { type: Date, default: Date.now }
